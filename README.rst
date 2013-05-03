@@ -17,6 +17,12 @@ install via pip::
 
     pip install hamster-bridge
 
+then run it with::
+
+    hamster-bridge
+
+It will ask you for your Jira server and login and will save that data for next starts in :code:`~/.hamster-bridge.cfg`
+
 license
 =======
 MIT-License, see LICENSE file.
