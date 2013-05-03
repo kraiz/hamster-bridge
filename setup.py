@@ -12,7 +12,6 @@ setup(
     url='https://github.com/kraiz/hamster-bridge',
     packages=['hamster_bridge', 'hamster_bridge.listeners'],
     entry_points={'console_scripts': ['hamster-bridge = hamster_bridge:main']},
-    license='LICENSE',
     long_description=open('README.rst').read(),
     install_requires = [
         'jira-python>=0.13'

@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from jira.exceptions import JIRAError
 from jira.client import JIRA
 
-from hamster_brigde.listeners import HamsterListener
+from hamster_bridge.listeners import HamsterListener
 
 import logging
 

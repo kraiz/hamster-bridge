@@ -1,13 +1,13 @@
 import logging
 
-from hamster_brigde.bridge import HamsterBrigde
+from hamster_bridge.bridge import HamsterBrigde
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)-15s %(levelname)+7s: %(message)s')
 logger = logging.getLogger(__name__)
 
 LISTENERS = [
     # TODO: do some fancy plugin loading mechanism here to allow loading other's listeners, contributions welcome!
-    'hamster_brigde.listeners.jira.JiraHamsterListener'
+    'hamster_bridge.listeners.jira.JiraHamsterListener'
 ]
 
 
