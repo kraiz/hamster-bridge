@@ -41,4 +41,4 @@ class JiraHamsterListener(HamsterListener):
             if e.text == 'Issue Does Not Exist':
                 logger.warning('Issue "%s" does not exist. Ignoring...', fact.activity)
             else:
-                logger.exception()
+                logger.exception('Error communicating with Jira:')
