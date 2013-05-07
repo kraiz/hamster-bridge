@@ -16,9 +16,10 @@ class JiraHamsterListener(HamsterListener):
     short_name = 'jira'
 
     config_values = [
-        ('server_url', 'the root url to your jira server [f.e. "http://jira.example.org"]'),
-        ('username', 'your jira user name'),
-        ('password', 'your jira password')
+        ('server_url', lambda: raw_input('Root url to your jira server [f.e. "http://jira.example.org"]\n')),
+        ('username', lambda: raw_input('Your jira user name\n')),
+        ('password', lambda: raw_input('Your jira password\n')),
+        ('auto_start', lambda: raw_input('Automatically start the issue when you start the task in hamster? [y/n]\n'))
     ]
 
     issue_from_title = re.compile('([A-Z][A-Z0-9]+-[0-9]+)')
@@ -51,6 +52,20 @@ class JiraHamsterListener(HamsterListener):
                 else:
                     raise e
         return None
+
+    def on_fact_started(self, fact):
+        if self.config.get(self.short_name, 'auto_start') == 'y':
+            try:
+                issue_name = self.__issue_from_fact(fact)
+                if issue_name is None:
+                    return
+
+                for transition in self.jira.transitions(issue_name):
+                    if transition['name'] == u'Start Progress':
+                        self.jira.transition_issue(issue_name, transition['id'])
+                        logger.info('Marked issue "%s" as "In Progress"', issue_name)
+            except JIRAError:
+                logger.exception('Error communicating with Jira:')
 
     def on_fact_stopped(self, fact):
         time_spent = '%dm' % (fact.delta.total_seconds() / 60)
