@@ -36,27 +36,27 @@ class JiraHamsterListener(HamsterListener):
             logger.exception('Can not connect to JIRA, please check hamster-bridge.cfg')
 
     def on_fact_stopped(self, fact):
-            time_spent = '%dm' % (fact.delta.total_seconds() / 60)
+        time_spent = '%dm' % (fact.delta.total_seconds() / 60)
 
-            try:
-                issue_name = None
-                for possible_issue in self.issue_from_title.findall(fact.activity):
-                    try:
-                        self.jira.issue(possible_issue)
-                        issue_name = possible_issue
-                        break
-                    except JIRAError, e:
-                        if e.text == 'Issue Does Not Exist':
-                            logger.warning('Tried Issue "%s", but does not exist. ', fact.activity)
-                            continue
-                        else:
-                            raise e
+        try:
+            issue_name = None
+            for possible_issue in self.issue_from_title.findall(fact.activity):
+                try:
+                    self.jira.issue(possible_issue)
+                    issue_name = possible_issue
+                    break
+                except JIRAError, e:
+                    if e.text == 'Issue Does Not Exist':
+                        logger.warning('Tried Issue "%s", but does not exist. ', fact.activity)
+                        continue
+                    else:
+                        raise e
 
-                if issue_name is not None:
-                    self.jira.add_worklog(fact.activity, time_spent)
-                    logger.info('Logged work: %s to %s', time_spent, issue_name)
-                else:
-                    logger.info('No valid issue found in "%s"', fact.activity)
+            if issue_name is not None:
+                self.jira.add_worklog(issue_name, time_spent)
+                logger.info('Logged work: %s to %s', time_spent, issue_name)
+            else:
+                logger.info('No valid issue found in "%s"', fact.activity)
 
-            except JIRAError:
-                logger.exception('Error communicating with Jira:')
+        except JIRAError:
+            logger.exception('Error communicating with Jira:')
