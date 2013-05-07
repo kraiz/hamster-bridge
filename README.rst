@@ -21,7 +21,8 @@ then run it with::
 
     hamster-bridge
 
-It will ask you for your Jira server and login and will save that data for next starts in :code:`~/.hamster-bridge.cfg`
+It will ask you for your Jira server and login and will save that data for next starts in :code:`~/.hamster-bridge.cfg`.
+All your hamster tasks will be added to the first jira issue found in the hamster activity title.
 
 license
 =======
