@@ -7,7 +7,8 @@ logger = logging.getLogger(__name__)
 
 LISTENERS = [
     # TODO: do some fancy plugin loading mechanism here to allow loading other's listeners, contributions welcome!
-    'hamster_bridge.listeners.jira.JiraHamsterListener'
+    'hamster_bridge.listeners.jira.JiraHamsterListener',
+    'hamster_bridge.listeners.redmine.RedmineHamsterListener',
 ]
 
 
