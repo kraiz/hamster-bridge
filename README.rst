@@ -1,6 +1,7 @@
 about
 =====
-you're using hamster to track your work? let your hamster log your work to your favorite bugtracker. ok, JIRA for now :)
+you're using hamster to track your work? let your hamster log your work to your favorite bugtracker. ok, JIRA & Redmine
+for now :)
 
 setup
 =====
@@ -19,7 +20,11 @@ install via pip::
 
 then run it with::
 
-    hamster-bridge
+    hamster-bridge jira
+
+or::
+
+    hamster-bridge redmine
 
 It will ask you for your Jira server and login and will save that data for next starts in :code:`~/.hamster-bridge.cfg`.
 All your hamster tasks will be added to the first jira issue found in the hamster activity title.

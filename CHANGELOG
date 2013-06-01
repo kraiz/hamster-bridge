@@ -1,3 +1,8 @@
+0.3.0
+------
+* new supported tracker: redmine (english & german) (contributed by dArignac)
+* NEW: required positional parameter: name of bugtracker name ("jira" oder "redmine")
+
 0.2.0
 ------
 * feature: autostart the jira issue when starting the task in hamster
