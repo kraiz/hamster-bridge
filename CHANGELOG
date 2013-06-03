@@ -1,3 +1,7 @@
+0.3.1
+------
+* bugfix: console_script linking caused error starting hamster-bridge
+
 0.3.0
 ------
 * new supported tracker: redmine (english & german) (contributed by dArignac)
