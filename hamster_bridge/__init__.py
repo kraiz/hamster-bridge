@@ -23,7 +23,7 @@ LISTENERS = [
 ]
 
 
-if __name__ == "__main__":
+def main():
     listener_choices = dict(
         (lc.short_name, lc) for lc in [import_listener(l) for l in LISTENERS]
     )
@@ -37,4 +37,7 @@ if __name__ == "__main__":
     logger.info('Activating listener: %s', args.bugtracker)
     bridge.add_listener(listener_choices[args.bugtracker]())
     bridge.configure()
-    bridge.run()
+    bridge.run()    
+
+if __name__ == "__main__":
+    main()
