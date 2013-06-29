@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from hamster_bridge.bridge import HamsterBrigde
+from hamster_bridge.bridge import HamsterBridge
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)-15s %(levelname)+7s: %(message)s')
@@ -33,7 +33,7 @@ def main():
     args = parser.parse_args()
 
     logger.info('Starting hamster bridge')
-    bridge = HamsterBrigde()
+    bridge = HamsterBridge()
     logger.info('Activating listener: %s', args.bugtracker)
     bridge.add_listener(listener_choices[args.bugtracker]())
     bridge.configure()

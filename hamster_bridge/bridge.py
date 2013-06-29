@@ -14,13 +14,13 @@ except ImportError:
     raise ImportError('Can not find hamster')
 
 
-class HamsterBrigde(hamster.client.Storage):
+class HamsterBridge(hamster.client.Storage):
     """
     Connects to the running hamster instance via dbus. But as the notification does not work reliable there is a
     polling-based loop in the run()-method that will trigger all registered listeners.
     """
     def __init__(self):
-        super(HamsterBrigde, self).__init__()
+        super(HamsterBridge, self).__init__()
         self._listeners = []
 
     def add_listener(self, listener):
