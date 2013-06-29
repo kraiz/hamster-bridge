@@ -14,6 +14,7 @@ setup(
     entry_points={'console_scripts': ['hamster-bridge = hamster_bridge:main']},
     long_description=open('README.rst').read(),
     install_requires = [
+        'oauthlib>0.3.7',
         'jira-python>=0.13'
     ]
 )
