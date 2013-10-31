@@ -25,7 +25,8 @@ class RedmineHamsterListener(HamsterListener):
     config_values = [
         ('server_url', lambda: raw_input('Root URL to the Redmine server [f.e. "http://redmine.example.org/"]\n')),
         ('api_key', lambda: raw_input('Your Redmine API access key.\n')),
-        ('auto_start', lambda: raw_input('Automatically start the issue when you start the task in hamster? [y/n]\n'))
+        ('auto_start', lambda: raw_input('Automatically start the issue when you start the task in hamster? [y/n]\n')),
+        ('verify_ssl', lambda: raw_input('Verify HTTPS/SSL connections? [y/n]\n')),
     ]
 
     # Redmine API resources
@@ -67,7 +68,8 @@ class RedmineHamsterListener(HamsterListener):
             'headers': {
                 'X-Redmine-API-Key': self.config.get(self.short_name, 'api_key'),
                 'content-type': 'application/json',
-            }
+            },
+            'verify': True if self.config.get(self.short_name, 'verify_ssl') == 'y' else False,
         }
 
         if data is not None and (method == 'put' or method == 'post'):
