@@ -42,17 +42,14 @@ class JiraHamsterListener(HamsterListener):
         :param tags: the tags to search the issue in
         """
         for t in tags:			
-          for possible_issue in self.issue_from_title.findall(t):
-            try:
-              logger.info('Lookup issue for tag "%s"', possible_issue)
-              self.jira.issue(possible_issue)
-              return possible_issue
-            except JIRAError, e:
-              logger.warning('Tried Issue "%s", but does not exist. ', t)
-              continue
-	    else:
-              logger.exception('Error communicating with Jira:%s', e)
- 	      raise e
+            for possible_issue in self.issue_from_title.findall(t):
+                try:
+                    logger.info('Lookup issue for tag "%s"', possible_issue)
+                    self.jira.issue(possible_issue)
+                    return possible_issue
+                except JIRAError:
+                    logger.warning('Tried Issue "%s", but does not exist. ', t)
+                    continue
         logger.info('No issue found for tags :%s', tags)
         return None
 
@@ -62,20 +59,20 @@ class JiraHamsterListener(HamsterListener):
         Get the issue name from a fact
         :param fact: the fact to search the issue in
         """
-        for possible_issue in self.issue_from_title.findall(fact.activity):            
+        for possible_issue in self.issue_from_title.findall(fact.activity):
             try:
                 logger.info('Lookup issue for activity "%s"', possible_issue)
                 self.jira.issue(possible_issue)
                 return possible_issue
             except JIRAError, e:
                 if e.text == 'Issue Does Not Exist':
-		    logger.warning('Tried Issue "%s", but does not exist. ', fact.activity)                   
-	    else:
-              logger.exception('Error communicating with Jira:%s', e)
- 	      raise e        
+                    logger.warning('Tried Issue "%s", but does not exist. ', fact.activity)
+                else:
+                    logger.exception('Error communicating with Jira:%s', e)
+                    raise e
         # try to lookup for issue in tag name
         if fact.tags:
-	  return self.__issue_from_tag(fact.tags)
+            return self.__issue_from_tag(fact.tags)
         logger.info('No issue found for fact :%s', fact)
         return None
 
