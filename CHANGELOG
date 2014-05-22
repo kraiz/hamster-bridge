@@ -1,3 +1,7 @@
+0.4.0
+------
+* feature: added support to lookup jira issue name in hamster tags (#9 thx toggm)
+
 0.3.1
 ------
 * bugfix: console_script linking caused error starting hamster-bridge

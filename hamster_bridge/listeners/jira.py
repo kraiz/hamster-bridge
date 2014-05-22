@@ -53,7 +53,6 @@ class JiraHamsterListener(HamsterListener):
         logger.info('No issue found for tags :%s', tags)
         return None
 
-
     def __issue_from_fact(self, fact):
         """
         Get the issue name from a fact

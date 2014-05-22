@@ -1,6 +1,9 @@
-Lars Kreisz
+kraiz - Lars Kreisz
 * maintainer of hamster-bridge
 * contributor & maintainer of jira integration
 
-Alexander Herrmann
+dArignac - Alexander Herrmann
 * contributor & maintainer of redmine integration
+
+toggm
+* added support to lookup jira issue name in hamster tags #9

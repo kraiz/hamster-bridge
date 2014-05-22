@@ -5,7 +5,7 @@ from setuptools import setup
 setup(
     name='hamster-bridge',
     description='let your hamster log your work to your favorite bugtracker',
-    version='0.3.1',
+    version='0.4.0',
     author='Lars Kreisz',
     author_email='der.kraiz@gmail.com',
     license='MIT',
