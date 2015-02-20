@@ -1,3 +1,10 @@
+changes
+=======
+
+0.5.0 - upcoming
+----------------
+* bugfix/feature: switched library from "jira-python" to "jira" to support current jira versions (#10)
+
 0.4.0
 ------
 * feature: added support to lookup jira issue name in hamster tags (#9 thx toggm)

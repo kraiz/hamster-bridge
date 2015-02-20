@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
-from jira.exceptions import JIRAError
-from jira.client import JIRA
+from jira import JIRA, JIRAError
 
 from hamster_bridge.listeners import HamsterListener
 
@@ -27,14 +26,14 @@ class JiraHamsterListener(HamsterListener):
     # noinspection PyBroadException
     def prepare(self):
         self.jira = JIRA(
-            options={'server': self.config.get(self.short_name, 'server_url')},
+            self.config.get(self.short_name, 'server_url'),
             basic_auth=(self.config.get(self.short_name, 'username'), self.config.get(self.short_name, 'password'))
         )
         # test
         try:
             self.jira.projects()
         except:
-            logger.exception('Can not connect to JIRA, please check hamster-bridge.cfg')
+            logger.exception('Can not connect to JIRA, please check ~/.hamster-bridge.cfg')
 
     def __issue_from_tag(self, tags):
         """
