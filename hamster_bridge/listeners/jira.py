@@ -94,8 +94,8 @@ class JiraHamsterListener(HamsterListener):
         try:
             issue_name = self.__issue_from_fact(fact)
             if issue_name is not None:
-                self.jira.add_worklog(issue_name, time_spent)
-                logger.info('Logged work: %s to %s', time_spent, issue_name)
+                worklog = self.jira.add_worklog(issue_name, time_spent)
+                logger.info('Logged work: %s to %s (created %r)', time_spent, issue_name, worklog)
             else:
                 logger.info('No valid issue found in "%s"', fact.activity)
 
