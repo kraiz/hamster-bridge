@@ -31,7 +31,6 @@ class HamsterBridge(hamster.client.Storage):
         :type  listener: HamsterListener
         """
         if listener not in self._listeners:
-            logger.info('Registering %s' % listener)
             self._listeners.append(listener)
 
     def configure(self):
@@ -42,12 +41,15 @@ class HamsterBridge(hamster.client.Storage):
         config = ConfigParser.RawConfigParser()
         # read from file if exists
         if os.path.exists(path):
+            logger.debug('Reading config file from %s', path)
             config.read(path)
         # let listeners extend
         for listener in self._listeners:
+            logger.debug('Configuring listener %s', listener)
             listener.configure(config)
         # save to file
         with open(path, 'wb') as configfile:
+            logger.debug('Writing back configuration to %s', path)
             config.write(configfile)
 
     def run(self, polling_intervall=1):
@@ -59,15 +61,19 @@ class HamsterBridge(hamster.client.Storage):
         """
         try:
             for listener in self._listeners:
+                logger.debug('Preparing listener %s', listener)
                 listener.prepare()
+            logger.info('Start listening for hamster activity...')
             while True:
                 now = datetime.datetime.now().replace(microsecond=0)
                 last = now - datetime.timedelta(seconds=polling_intervall)
                 for fact in self.get_todays_facts():
                     if fact.start_time is not None and last <= fact.start_time < now:
+                        logger.debug('Found a started task: %r', vars(fact))
                         for listener in self._listeners:
                             listener.on_fact_started(fact)
                     if fact.end_time is not None and last <= fact.end_time < now:
+                        logger.debug('Found a stopped task: %r', vars(fact))
                         for listener in self._listeners:
                             listener.on_fact_stopped(fact)
                 time.sleep(polling_intervall)

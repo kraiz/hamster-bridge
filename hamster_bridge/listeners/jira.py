@@ -25,54 +25,37 @@ class JiraHamsterListener(HamsterListener):
 
     # noinspection PyBroadException
     def prepare(self):
-        self.jira = JIRA(
-            self.config.get(self.short_name, 'server_url'),
-            basic_auth=(self.config.get(self.short_name, 'username'), self.config.get(self.short_name, 'password'))
-        )
-        # test
+        server_url = self.config.get(self.short_name, 'server_url')
+        username = self.config.get(self.short_name, 'username')
+        password = self.config.get(self.short_name, 'password')
+
+        logger.info('Connecting as "%s" to "%s"', username, server_url)
+        self.jira = JIRA(server_url, basic_auth=(username, password))
+
         try:
             self.jira.projects()
         except:
             logger.exception('Can not connect to JIRA, please check ~/.hamster-bridge.cfg')
-
-    def __issue_from_tag(self, tags):
-        """
-        Get the issue name from a fact tag
-        :param tags: the tags to search the issue in
-        """
-        for t in tags:			
-            for possible_issue in self.issue_from_title.findall(t):
-                try:
-                    logger.info('Lookup issue for tag "%s"', possible_issue)
-                    self.jira.issue(possible_issue)
-                    return possible_issue
-                except JIRAError:
-                    logger.warning('Tried Issue "%s", but does not exist. ', t)
-                    continue
-        logger.info('No issue found for tags :%s', tags)
-        return None
 
     def __issue_from_fact(self, fact):
         """
         Get the issue name from a fact
         :param fact: the fact to search the issue in
         """
-        for possible_issue in self.issue_from_title.findall(fact.activity):
-            try:
-                logger.info('Lookup issue for activity "%s"', possible_issue)
-                self.jira.issue(possible_issue)
-                return possible_issue
-            except JIRAError, e:
-                if e.text == 'Issue Does Not Exist':
-                    logger.warning('Tried Issue "%s", but does not exist. ', fact.activity)
-                else:
-                    logger.exception('Error communicating with Jira:%s', e)
-                    raise e
-        # try to lookup for issue in tag name
-        if fact.tags:
-            return self.__issue_from_tag(fact.tags)
-        logger.info('No issue found for fact :%s', fact)
-        return None
+        fields = [fact.activity] + fact.tags
+        logger.debug('Searching ticket in: %r', fields)
+        for field in fields:
+            for possible_issue in self.issue_from_title.findall(field):
+                logger.debug('Lookup issue for activity "%s"', possible_issue)
+                try:
+                    self.jira.issue(possible_issue)
+                    logger.debug('Found existing issue "%s" in "%s"', possible_issue, field)
+                    return possible_issue
+                except JIRAError, e:
+                    if e.text == 'Issue Does Not Exist':
+                        logger.warning('Tried issue "%s", but does not exist. ', fact.activity)
+                    else:
+                        logger.exception('Error communicating with Jira')
 
     def on_fact_started(self, fact):
         if self.config.get(self.short_name, 'auto_start') == 'y':
@@ -86,18 +69,14 @@ class JiraHamsterListener(HamsterListener):
                         self.jira.transition_issue(issue_name, transition['id'])
                         logger.info('Marked issue "%s" as "In Progress"', issue_name)
             except JIRAError:
-                logger.exception('Error communicating with Jira:')
+                logger.exception('Error communicating with Jira')
 
     def on_fact_stopped(self, fact):
         time_spent = '%dm' % (fact.delta.total_seconds() / 60)
-
-        try:
-            issue_name = self.__issue_from_fact(fact)
-            if issue_name is not None:
+        issue_name = self.__issue_from_fact(fact)
+        if issue_name:
+            try:
                 worklog = self.jira.add_worklog(issue_name, time_spent)
                 logger.info('Logged work: %s to %s (created %r)', time_spent, issue_name, worklog)
-            else:
-                logger.info('No valid issue found in "%s"', fact.activity)
-
-        except JIRAError:
-            logger.exception('Error communicating with Jira:')
+            except JIRAError:
+                logger.exception('Error communicating with Jira')
