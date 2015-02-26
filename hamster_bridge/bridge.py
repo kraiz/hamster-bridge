@@ -3,6 +3,7 @@ import datetime
 import time
 import logging
 import os
+import stat
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,9 @@ class HamsterBridge(hamster.client.Storage):
         with open(path, 'wb') as configfile:
             logger.debug('Writing back configuration to %s', path)
             config.write(configfile)
+        # as we store passwords in clear text, let's at least set correct file permissions
+        logger.debug('Setting owner only file permissions to %s', path)
+        os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
 
     def run(self, polling_intervall=1):
         """
