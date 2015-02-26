@@ -53,7 +53,7 @@ class JiraHamsterListener(HamsterListener):
                     return possible_issue
                 except JIRAError, e:
                     if e.text == 'Issue Does Not Exist':
-                        logger.warning('Tried issue "%s", but does not exist. ', fact.activity)
+                        logger.warning('Tried issue "%s", but does not exist. ', possible_issue)
                     else:
                         logger.exception('Error communicating with Jira')
 
@@ -80,3 +80,5 @@ class JiraHamsterListener(HamsterListener):
                 logger.info('Logged work: %s to %s (created %r)', time_spent, issue_name, worklog)
             except JIRAError:
                 logger.exception('Error communicating with Jira')
+        else:
+            logger.debug('No jira issue found')
