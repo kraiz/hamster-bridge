@@ -76,7 +76,7 @@ class JiraHamsterListener(HamsterListener):
         issue_name = self.__issue_from_fact(fact)
         if issue_name:
             try:
-                worklog = self.jira.add_worklog(issue_name, time_spent)
+                worklog = self.jira.add_worklog(issue_name, time_spent, comment=fact.description)
                 logger.info('Logged work: %s to %s (created %r)', time_spent, issue_name, worklog)
             except JIRAError:
                 logger.exception('Error communicating with Jira')
