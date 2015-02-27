@@ -32,10 +32,18 @@ usage
 =====
 * Start hamster and the hamster-bridge.
 * Create tasks and place a JIRA/Redmine issue name inside the task title or it's tags.
-* As soon as you stop the task in hamster, the hamster-bridge should detect this, find the issue and log the spent time
-  to your JIRA/Redmine server.
+* When you're done, stop this task.
 
-Problems? Don't work for you? Open up an issue here together with the debug output (start the bridge with "-d").
+When you stop, the hamster-bridge becomes active and search for a valid ticket name. For JIRA that's something like
+"ABC-34" (the actually regex is `[A-Z][A-Z0-9]+-[0-9]+`). It will search the title first, when there's none, it
+looks into the tags. It will use the issue name only when it really exists, f.e. in a task with the title "Fixing the
+STUDIO-54 error message" with the tag "DISCO-433", there will be an existence check of "STUDIO-54", if it does not exist
+it will read through to issue in the tag.
+Once *one* valid ticket is found, the hamster-bridge will log the spent time to this issue together with the hamster
+task description as comment.
+
+Problems? Don't work for you? Open up an `issue on GitHub <http://docutils.sourceforge.net/rst.html>`_ together with the
+debug output (start the bridge with "-d").
 
 license
 =======
