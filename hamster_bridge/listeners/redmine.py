@@ -1,9 +1,14 @@
+from __future__ import absolute_import
+
 import json
 import logging
 import re
 import requests
 
 from hamster_bridge.listeners import HamsterListener
+
+from redmine import Redmine
+from redmine.exceptions import BaseRedmineError
 
 
 logger = logging.getLogger(__name__)
@@ -25,33 +30,49 @@ class RedmineHamsterListener(HamsterListener):
     config_values = [
         ('server_url', lambda: raw_input('Root URL to the Redmine server [f.e. "http://redmine.example.org/"]\n')),
         ('api_key', lambda: raw_input('Your Redmine API access key.\n')),
+        ('version', lambda: raw_input('The Redmine version number, e.g. 2.5.1\n')),
         ('auto_start', lambda: raw_input('Automatically start the issue when you start the task in hamster? [y/n]\n')),
+        # FIXME still usable?
         ('verify_ssl', lambda: raw_input('Verify HTTPS/SSL connections? [y/n]\n')),
     ]
 
-    # Redmine API resources
-    resources = {
-        'issue': 'issues/%(issue_id)s.json',
-        'issue_statuses': 'issue_statuses.json',
-        'time_entries': 'time_entries.json',
-    }
-
     # Redmine issue key is just a number
     issue_from_title = re.compile('([0-9]+)\ ')
+
+    def __get_config(self, key):
+        """
+        Returns the config value with the given key.
+        :param key: the key to get
+        :type key: basestring
+        :return: the config value
+        :rtype: basestring
+        """
+        return self.config.get(self.short_name, key)
 
     def __init__(self):
         """
         Sets up the class be defining some internal variables.
         """
+        # FIXME still necessary?
         # will store the issue statuses as returned by Redmine API during the call of RedmineHamsterListener.prepare
         self.__issues_statuses = []
+        # FIXME still necessary?
         # will store the issue data, will be updated per issue whenever an issue is requested on the API
         self.__issues = {}
+        # FIXME still necessary?
         # issue status dict for the default issue status
         self.__issue_status_default = None
+        # FIXME still necessary?
         # issue status dict for the "in Work" status
         self.__issue_status_in_work = None
 
+        # the redmine instance
+        self.redmine = None
+
+        # will store the activities
+        self.__activities = {}
+
+    # FIXME still necessary?
     def __request_resource(self, resource, method='get', data=None):
         """
         Request the given resource from the Redmine API using the given method.
@@ -87,6 +108,7 @@ class RedmineHamsterListener(HamsterListener):
             **kwargs
         )
 
+    # FIXME still necessary?
     def __update_issue(self, issue_id, data):
         """
         Updates the issue with the given id with the given data.
@@ -104,6 +126,7 @@ class RedmineHamsterListener(HamsterListener):
         if req.status_code != 200:
             logger.error('Unable to set issue %(issue_id)s to data %(data)s.' % {'issue_id': issue_id, 'data': data})
 
+    # FIXME still necessary?
     def __log_work(self, issue_number, date_spent_on, time_spent):
         """
         Logs work to Redmine with the given values.
@@ -135,8 +158,9 @@ class RedmineHamsterListener(HamsterListener):
                 'date_spent_on': date_spent_on,
             })
         else:
-            logger.error('Unable to log time to Redmine. HTTP status code was %s' % req.status_code)
+            logger.error('Unable to log time to Redmine. HTTP status code was %s with error %s', req.status_code, req.text)
 
+    # FIXME still necessary?
     def __exists_issue(self, issue_id):
         """
         Checks if an issue with the given issue_id exists by calling the Redmine API,
@@ -152,6 +176,7 @@ class RedmineHamsterListener(HamsterListener):
 
         return False
 
+    # FIXME still necessary?
     def __get_issue_id_from_fact(self, fact):
         """
         Tries to find an issue matching the given fact.
@@ -169,6 +194,7 @@ class RedmineHamsterListener(HamsterListener):
 
         return None
 
+    # FIXME still necessary?
     def __filter_issue_statuses(self):
         """
         Filters the issue statuses for the relevant ones: the default and the status "In Work".
@@ -196,14 +222,37 @@ class RedmineHamsterListener(HamsterListener):
         Prepares the listener by checking connectivity to configured Redmine instance.
         While doing so, grabs the issue statuses, too, used for on_fact_stopped.
         """
-        # grab the available issues statuses
-        req = self.__request_resource(self.resources['issue_statuses'])
-        if req.status_code == 200:
-            self.__issues_statuses = req.json()['issue_statuses']
-            self.__filter_issue_statuses()
-        else:
-            logger.error('Could not connect to Redmine and call the REST API, please check ~/.hamster-bridge.cfg')
+        # setup the redmine instance
+        print(self.__get_config('server_url'))
+        self.redmine = Redmine(
+            self.__get_config('server_url'),
+            key=self.__get_config('api_key'),
+            version=self.__get_config('version'),
+            requests={
+                'verify': True if self.__get_config('verify_ssl') == 'y' else False
+            }
+        )
+        # fetch the possbile activities for time entries
+        time_entry_activities = self.redmine.enumeration.filter(resource='time_entry_activities')
 
+        # only now the real http request is made, use this as connectivity check
+        try:
+            for tea in time_entry_activities:
+                print(tea, tea.id, tea.name)
+        except (BaseRedmineError, IOError, ConnectionError):
+            logger.exception('Unable to communicate with redmine server. See error in the following output:')
+
+
+        # FIXME do we still need the issue statuses?
+        # # grab the available issues statuses
+        # req = self.__request_resource(self.resources['issue_statuses'])
+        # if req.status_code == 200:
+        #     self.__issues_statuses = req.json()['issue_statuses']
+        #     self.__filter_issue_statuses()
+        # else:
+        #     logger.error('Could not connect to Redmine and call the REST API, please check ~/.hamster-bridge.cfg')
+
+    # FIXME still necessary?
     def on_fact_started(self, fact):
         """
         Called by HamsterBridge if a fact is started.
@@ -227,6 +276,7 @@ class RedmineHamsterListener(HamsterListener):
                         }
                     )
 
+    # FIXME still necessary?
     def on_fact_stopped(self, fact):
         """
         Called by HamsterBridge if a fact is stopped.
