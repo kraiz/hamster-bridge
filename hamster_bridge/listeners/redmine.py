@@ -222,12 +222,12 @@ class RedmineHamsterListener(HamsterListener):
             logger.exception('Unable to fetch issue statuses! Not possible to proceed!')
 
         try:
-            self.__issue_status_default = filter(find_default, issue_statuses)[0]
+            self.__issue_status_default = [item for item in issue_statuses if find_default(item)][0]
         except IndexError:
             logger.exception('Unable to find a single default issue status!')
 
         try:
-            self.__issue_status_in_work = filter(find_in_work, issue_statuses)[0]
+            self.__issue_status_in_work = [item for item in issue_statuses if find_in_work(item)][0]
         except IndexError:
             logger.exception('Unable to find a single "In Work" issue status!')
 
