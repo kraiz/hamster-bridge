@@ -67,10 +67,13 @@ Upon start of the hamster-bridge, all activities will be listed:
     2015-03-01 14:23:31,437    INFO: Start listening for hamster activity...
 
 If you set the name of an activity as tag, it will be used for the created time entry. If you do not specify a tag, the first activity (and usually the default
-one in Redmine) will be used. If you specify more than one activity as tag value, the first found will be used.
-You can mix the activity tags with other tags - the first found tag that matches the name of an activity will be used for the entry.
+one in Redmine) will be used. If you specify more than one activity as tag value, the first found will be used (but see the hints below!).
+You can mix the activity tags with other tags - the first found tag that matches the name of an activity will be used for the entry (see the hints, too).
 
-*Hint:* activity names are case sensitive!
+*Important hints:*
+* activity names are case sensitive
+* hamster is sorting the tags alphabetically
+** if you e.g. set the tags "Development" and "Design" in this order, hamster will sort them to ['Design', 'Development'] thus the time entry will be attached to "Design"
 
 
 license
