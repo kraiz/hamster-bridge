@@ -223,7 +223,6 @@ class RedmineHamsterListener(HamsterListener):
         While doing so, grabs the issue statuses, too, used for on_fact_stopped.
         """
         # setup the redmine instance
-        print(self.__get_config('server_url'))
         self.redmine = Redmine(
             self.__get_config('server_url'),
             key=self.__get_config('api_key'),
@@ -232,14 +231,14 @@ class RedmineHamsterListener(HamsterListener):
                 'verify': True if self.__get_config('verify_ssl') == 'y' else False
             }
         )
-        # fetch the possbile activities for time entries
+        # fetch the possible activities for time entries
         time_entry_activities = self.redmine.enumeration.filter(resource='time_entry_activities')
 
         # only now the real http request is made, use this as connectivity check
         try:
             for tea in time_entry_activities:
-                print(tea, tea.id, tea.name)
-        except (BaseRedmineError, IOError, ConnectionError):
+                self.__activities[tea.id] = tea.name
+        except (BaseRedmineError, IOError):
             logger.exception('Unable to communicate with redmine server. See error in the following output:')
 
 
