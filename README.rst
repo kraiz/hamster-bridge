@@ -14,6 +14,9 @@ create virtualenv with system packages::
     virtualenv --system-site-packages path/to/hamster-bridge-env
     source path/to/hamster-bridge-env/bin/activate
 
+JIRA
+----
+
 install via pip::
 
     pip install hamster-bridge
@@ -22,7 +25,14 @@ then run it with::
 
     hamster-bridge jira
 
-or::
+Redmine
+-------
+
+install via pip::
+
+    pip install hamster-bridge[redmine]
+
+then run it with::
 
     hamster-bridge redmine
 
