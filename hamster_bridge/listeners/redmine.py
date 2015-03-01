@@ -8,7 +8,10 @@ import requests
 from hamster_bridge.listeners import HamsterListener
 
 from redmine import Redmine
-from redmine.exceptions import BaseRedmineError
+from redmine.exceptions import (
+    BaseRedmineError,
+    ResourceNotFoundError,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -176,7 +179,6 @@ class RedmineHamsterListener(HamsterListener):
 
         return False
 
-    # FIXME still necessary?
     def __get_issue_id_from_fact(self, fact):
         """
         Tries to find an issue matching the given fact.
@@ -188,9 +190,10 @@ class RedmineHamsterListener(HamsterListener):
         """
         # iterate the possible issues, normally this should match exactly one...
         for possible_issue in self.issue_from_title.findall(fact.activity):
-            # check if there is an issue with this id in Redmine
-            if self.__exists_issue(possible_issue):
-                return possible_issue
+            try:
+                return self.redmine.issue.get(possible_issue).id
+            except ResourceNotFoundError:
+                return None
 
         return None
 
@@ -241,7 +244,6 @@ class RedmineHamsterListener(HamsterListener):
         except (BaseRedmineError, IOError):
             logger.exception('Unable to communicate with redmine server. See error in the following output:')
 
-
         # FIXME do we still need the issue statuses?
         # # grab the available issues statuses
         # req = self.__request_resource(self.resources['issue_statuses'])
@@ -261,6 +263,8 @@ class RedmineHamsterListener(HamsterListener):
         :param fact: the currently stopped fact
         :type fact: hamster.lib.stuff.Fact
         """
+        # FIXME remove
+        print('on_fact_started', fact)
         if self.config.get(self.short_name, 'auto_start') == 'y':
             issue_id = self.__get_issue_id_from_fact(fact)
             if issue_id is not None:
@@ -277,6 +281,8 @@ class RedmineHamsterListener(HamsterListener):
 
     # FIXME still necessary?
     def on_fact_stopped(self, fact):
+        # FIXME remove
+        print('on_fact_stopped', fact)
         """
         Called by HamsterBridge if a fact is stopped.
         Will try to log the time to the appropriate Redmine issue if there is one.
