@@ -194,4 +194,5 @@ class RedmineHamsterListener(HamsterListener):
             hours='%0.2f' % (fact.delta.total_seconds() / 3600.0),
             # FIXME this grabs the first activity from the dict, it should somehow be defined.... maybe through the tags?
             activity_id=self.__activities.itervalues().next(),
+            comments=fact.description,
         )
