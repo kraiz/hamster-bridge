@@ -75,6 +75,9 @@ class RedmineHamsterListener(HamsterListener):
         # will store the activities
         self.__activities = {}
 
+        # will store the currently active issue
+        self.issue = None
+
     # FIXME still necessary?
     def __request_resource(self, resource, method='get', data=None):
         """
@@ -179,19 +182,19 @@ class RedmineHamsterListener(HamsterListener):
 
         return False
 
-    def __get_issue_id_from_fact(self, fact):
+    def __get_issue_from_fact(self, fact):
         """
         Tries to find an issue matching the given fact.
 
         :param fact: the currently stopped fact
         :type fact: hamster.lib.stuff.Fact
-        :returns: the issue (number) or None if not found
-        :rtype: str
+        :returns: the issue or None if not found
+        :rtype:
         """
         # iterate the possible issues, normally this should match exactly one...
         for possible_issue in self.issue_from_title.findall(fact.activity):
             try:
-                return self.redmine.issue.get(possible_issue).id
+                return self.redmine.issue.get(possible_issue)
             except ResourceNotFoundError:
                 return None
 
@@ -258,7 +261,6 @@ class RedmineHamsterListener(HamsterListener):
         # fetch all available issue statuses and filter the default and in work ones as they are the only relevant statuses here
         self.__filter_issue_statuses()
 
-    # FIXME still necessary?
     def on_fact_started(self, fact):
         """
         Called by HamsterBridge if a fact is started.
@@ -268,30 +270,26 @@ class RedmineHamsterListener(HamsterListener):
         :param fact: the currently stopped fact
         :type fact: hamster.lib.stuff.Fact
         """
-        # FIXME remove
-        print('on_fact_started', fact)
+        # if issue shall be auto started...
         if self.config.get(self.short_name, 'auto_start') == 'y':
-            issue_id = self.__get_issue_id_from_fact(fact)
+            # fetch the issue from the hamster fact
+            self.issue = self.__get_issue_from_fact(fact)
 
-            from pprint import pprint
-            pprint(self.redmine.issue.get(issue_id).__dict__, indent=4)
+            if not self.issue:
+                logger.error('Unable to query an issue for the hamster fact %s', fact.original_activity)
+                return
 
-            # if issue_id is not None:
-            #     # check if the issue is in the default issue statement
-            #     if self.__issues[issue_id]['status']['name'] == self.__issue_status_default['name']:
-            #         self.__update_issue(
-            #             issue_id,
-            #             {
-            #                 'issue': {
-            #                     'status_id': self.__issue_status_in_work['id'],
-            #                 }
-            #             }
-            #         )
+            # if the issue is in the default state (aka the initial state), put it into work state
+            if self.issue.status.id == self.__issue_status_default.id:
+                logger.info('setting status to "In Work" for issue %d', self.issue.id)
+                self.issue.status_id = self.__issue_status_in_work.id
+                self.issue.save()
 
     # FIXME still necessary?
     def on_fact_stopped(self, fact):
         # FIXME remove
         print('on_fact_stopped', fact)
+        # TODO handle self.issue
         """
         Called by HamsterBridge if a fact is stopped.
         Will try to log the time to the appropriate Redmine issue if there is one.
