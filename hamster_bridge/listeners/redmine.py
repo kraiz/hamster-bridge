@@ -197,26 +197,37 @@ class RedmineHamsterListener(HamsterListener):
 
         return None
 
-    # FIXME still necessary?
     def __filter_issue_statuses(self):
         """
         Filters the issue statuses for the relevant ones: the default and the status "In Work".
         """
+
         def find_default(element):
-            if 'is_default' in element and element['is_default']:
-                return True
+            """
+            Filter function to find the default issue status.
+            """
+            return hasattr(element, 'is_default') and getattr(element, 'is_default', False)
 
         def find_in_work(element):
-            if element['id'] > 1 and element['name'] in [u'In Bearbeitung', u'In Work']:
-                return True
+            """
+            Filter function to find the in work status.
+            """
+            return element.name in [u'In Bearbeitung', u'In Work']
+
+        # get the issue statuses
+        issue_statuses = self.redmine.issue_status.all()
+
+        # if none are found, raise
+        if len(issue_statuses) == 0:
+            logger.exception('Unable to fetch issue statuses! Not possible to proceed!')
 
         try:
-            self.__issue_status_default = filter(find_default, self.__issues_statuses)[0]
+            self.__issue_status_default = filter(find_default, issue_statuses)[0]
         except IndexError:
             logger.exception('Unable to find a single default issue status!')
 
         try:
-            self.__issue_status_in_work = filter(find_in_work, self.__issues_statuses)[0]
+            self.__issue_status_in_work = filter(find_in_work, issue_statuses)[0]
         except IndexError:
             logger.exception('Unable to find a single "In Work" issue status!')
 
@@ -244,14 +255,8 @@ class RedmineHamsterListener(HamsterListener):
         except (BaseRedmineError, IOError):
             logger.exception('Unable to communicate with redmine server. See error in the following output:')
 
-        # FIXME do we still need the issue statuses?
-        # # grab the available issues statuses
-        # req = self.__request_resource(self.resources['issue_statuses'])
-        # if req.status_code == 200:
-        #     self.__issues_statuses = req.json()['issue_statuses']
-        #     self.__filter_issue_statuses()
-        # else:
-        #     logger.error('Could not connect to Redmine and call the REST API, please check ~/.hamster-bridge.cfg')
+        # fetch all available issue statuses and filter the default and in work ones as they are the only relevant statuses here
+        self.__filter_issue_statuses()
 
     # FIXME still necessary?
     def on_fact_started(self, fact):
@@ -267,17 +272,21 @@ class RedmineHamsterListener(HamsterListener):
         print('on_fact_started', fact)
         if self.config.get(self.short_name, 'auto_start') == 'y':
             issue_id = self.__get_issue_id_from_fact(fact)
-            if issue_id is not None:
-                # check if the issue is in the default issue statement
-                if self.__issues[issue_id]['status']['name'] == self.__issue_status_default['name']:
-                    self.__update_issue(
-                        issue_id,
-                        {
-                            'issue': {
-                                'status_id': self.__issue_status_in_work['id'],
-                            }
-                        }
-                    )
+
+            from pprint import pprint
+            pprint(self.redmine.issue.get(issue_id).__dict__, indent=4)
+
+            # if issue_id is not None:
+            #     # check if the issue is in the default issue statement
+            #     if self.__issues[issue_id]['status']['name'] == self.__issue_status_default['name']:
+            #         self.__update_issue(
+            #             issue_id,
+            #             {
+            #                 'issue': {
+            #                     'status_id': self.__issue_status_in_work['id'],
+            #                 }
+            #             }
+            #         )
 
     # FIXME still necessary?
     def on_fact_stopped(self, fact):
