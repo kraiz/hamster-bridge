@@ -137,8 +137,10 @@ class RedmineHamsterListener(HamsterListener):
 
         # only now the real http request is made, use this as connectivity check
         try:
+            logger.info('### Available Redmine activities for using as tag value:')
             for tea in time_entry_activities:
                 self.__activities[tea.id] = tea.name
+                logger.info('### ' + tea.name)
         except (BaseRedmineError, IOError):
             logger.exception('Unable to communicate with redmine server. See error in the following output:')
 

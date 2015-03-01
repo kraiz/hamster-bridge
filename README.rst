@@ -47,6 +47,32 @@ usage
 
 Problems? Don't work for you? Open up an issue here together with the debug output (start the bridge with "-d").
 
+hints on redmine
+----------------
+
+Redmine behaves slightly different than JIRA. For each time entry that is created, an activity has to be chosen. Within the Redmine installation a default
+activity *can* be defined but usually this is not the way the installation is set up. Therefore one must be able to select the activity when creating a time
+entry. As the hamster does not offer any field for such activity, we instead use the tags field.
+Upon start of the hamster-bridge, all activities will be listed:
+
+::
+
+    2015-03-01 14:23:31,001    INFO: Starting hamster bridge
+    2015-03-01 14:23:31,003    INFO: ### Available Redmine activities for using as tag value:
+    2015-03-01 14:23:31,011    INFO: Starting new HTTPS connection (1): redmine.yourhost.com
+    2015-03-01 14:23:31,229    INFO: ### Development
+    2015-03-01 14:23:31,229    INFO: ### Design
+    2015-03-01 14:23:31,230    INFO: ### Deployment
+    2015-03-01 14:23:31,230    INFO: Starting new HTTPS connection (1): redmine.yourhost.com
+    2015-03-01 14:23:31,437    INFO: Start listening for hamster activity...
+
+If you set the name of an activity as tag, it will be used for the created time entry. If you do not specify a tag, the first activity (and usually the default
+one in Redmine) will be used. If you specify more than one activity as tag value, the first found will be used.
+You can mix the activity tags with other tags - the first found tag that matches the name of an activity will be used for the entry.
+
+*Hint:* activity names are case sensitive!
+
+
 license
 =======
 MIT-License, see LICENSE file.
