@@ -71,9 +71,10 @@ one in Redmine) will be used. If you specify more than one activity as tag value
 You can mix the activity tags with other tags - the first found tag that matches the name of an activity will be used for the entry (see the hints, too).
 
 *Important hints:*
+
 * activity names are case sensitive
 * hamster is sorting the tags alphabetically
-** if you e.g. set the tags "Development" and "Design" in this order, hamster will sort them to ['Design', 'Development'] thus the time entry will be attached to "Design"
+    * if you e.g. set the tags "Development" and "Design" in this order, hamster will sort them to ['Design', 'Development'] thus the time entry will be attached to "Design"
 
 
 license
