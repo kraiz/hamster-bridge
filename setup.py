@@ -10,6 +10,9 @@ setup(
     author_email='der.kraiz@gmail.com',
     license='MIT',
     url='https://github.com/kraiz/hamster-bridge',
+    extras_require={
+        'redmine': ['python-redmine'],
+    },
     packages=['hamster_bridge', 'hamster_bridge.listeners'],
     entry_points={'console_scripts': ['hamster-bridge = hamster_bridge:main']},
     long_description=open('README.rst').read() + '\n\n' + open('CHANGELOG.rst').read(),
