@@ -5,6 +5,7 @@ changes
 ----------------
 * feature: map hamster's task description field to jira worklog comment (#11)
 * feature: improved logging a lot, added --debug switch (#12)
+* feature: added flag to set the hamster check interval
 * bugfix/feature: switched library from "jira-python" to "jira" to support current jira versions (#10)
 * bugfix: force sensitive file permissions for config file
 
