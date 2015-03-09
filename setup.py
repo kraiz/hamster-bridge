@@ -7,7 +7,7 @@ setup(
     description='let your hamster log your work to your favorite bugtracker',
     version='0.5.0',
     author='Lars Kreisz',
-    author_email='der.kraiz@gmail.com',
+    author_email='lars.kreisz@gmail.com',
     license='MIT',
     url='https://github.com/kraiz/hamster-bridge',
     extras_require={
