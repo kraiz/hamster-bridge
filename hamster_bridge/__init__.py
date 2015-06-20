@@ -4,6 +4,9 @@ import logging
 from hamster_bridge.bridge import HamsterBridge
 
 
+CONFIG_PATH = '~/.hamster-bridge.cfg'
+
+
 def import_listener(name):
     components = name.rsplit('.')
     mod = __import__(name.rsplit('.', 1)[0])
@@ -29,7 +32,10 @@ def main():
     parser.add_argument('-d', '--debug', action='store_true', help='enable debug logging')
     parser.add_argument('-c', '--check-interval', default='2', type=int,
                         help='check every this amount of seconds for updates')
+    parser.add_argument('--config-path', default=CONFIG_PATH, type=str, 
+                        help='path to config file, defaults to {}'.format(CONFIG_PATH))
     args = parser.parse_args()
+    print args
 
     logging.basicConfig(
         level=logging.DEBUG if args.debug else logging.INFO,
@@ -41,7 +47,7 @@ def main():
     bridge = HamsterBridge()
     logger.debug('Activating listener: %s', args.bugtracker)
     bridge.add_listener(listener_choices[args.bugtracker]())
-    bridge.configure()
+    bridge.configure(args.config_path)
     logger.debug('Run with check interval of %ds', args.check_interval)
     bridge.run(args.check_interval)
 

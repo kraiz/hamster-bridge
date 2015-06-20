@@ -7,7 +7,6 @@ import stat
 
 logger = logging.getLogger(__name__)
 
-CONFIG_PATH = '~/.hamster-bridge.cfg'
 
 try:
     import hamster.client
@@ -34,11 +33,11 @@ class HamsterBridge(hamster.client.Storage):
         if listener not in self._listeners:
             self._listeners.append(listener)
 
-    def configure(self):
+    def configure(self, config_path):
         """
         Gives each listener the chance to do something before we start the bridge's runtime loops.
         """
-        path = os.path.expanduser(CONFIG_PATH)
+        path = os.path.expanduser(config_path)
         config = ConfigParser.RawConfigParser()
         # read from file if exists
         if os.path.exists(path):
