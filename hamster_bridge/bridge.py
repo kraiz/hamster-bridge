@@ -36,6 +36,8 @@ class HamsterBridge(hamster.client.Storage):
     def configure(self, config_path):
         """
         Gives each listener the chance to do something before we start the bridge's runtime loops.
+        :param config_path: path to config file
+        :type config_path:  str
         """
         path = os.path.expanduser(config_path)
         config = ConfigParser.RawConfigParser()
