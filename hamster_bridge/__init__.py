@@ -35,7 +35,6 @@ def main():
     parser.add_argument('--config-path', default=CONFIG_PATH, type=str, 
                         help='path to config file, defaults to {}'.format(CONFIG_PATH))
     args = parser.parse_args()
-    print args
 
     logging.basicConfig(
         level=logging.DEBUG if args.debug else logging.INFO,
