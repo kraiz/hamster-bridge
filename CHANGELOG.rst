@@ -1,6 +1,10 @@
 changes
 =======
 
+0.5.1
+-----
+* bugfix: fixed redmine missing dependency (#18)
+
 0.5.0
 -----
 * feature: map hamster's task description field to jira worklog comment (#11)
