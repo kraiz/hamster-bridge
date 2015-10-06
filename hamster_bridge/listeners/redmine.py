@@ -5,12 +5,6 @@ import re
 
 from hamster_bridge.listeners import HamsterListener
 
-from redmine import Redmine
-from redmine.exceptions import (
-    BaseRedmineError,
-    ResourceNotFoundError,
-)
-
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +69,8 @@ class RedmineHamsterListener(HamsterListener):
         :returns: the issue or None if not found
         :rtype:
         """
+        from redmine.exceptions import ResourceNotFoundError
+        
         # iterate the possible issues, normally this should match exactly one...
         for possible_issue in self.issue_from_title.findall(fact.activity):
             try:
@@ -156,6 +152,9 @@ class RedmineHamsterListener(HamsterListener):
         Prepares the listener by checking connectivity to configured Redmine instance.
         While doing so, grabs the issue statuses, too, used for on_fact_stopped.
         """
+        from redmine import Redmine
+        from redmine.exceptions import BaseRedmineError
+        
         # setup the redmine instance
         self.redmine = Redmine(
             self.__get_config('server_url'),
