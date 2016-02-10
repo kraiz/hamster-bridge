@@ -15,6 +15,6 @@ setup(
     },
     packages=['hamster_bridge', 'hamster_bridge.listeners'],
     entry_points={'console_scripts': ['hamster-bridge = hamster_bridge:main']},
-    long_description=open('README.rst').read() + '\n\n' + open('CHANGELOG.rst').read(),
+    long_description=open('README.rst').read(),
     install_requires=['jira>=0.41']
 )
