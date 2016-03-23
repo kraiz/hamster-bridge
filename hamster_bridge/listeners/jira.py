@@ -6,6 +6,7 @@ from hamster_bridge.listeners import HamsterListener
 
 import logging
 import re
+from getpass import getpass
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class JiraHamsterListener(HamsterListener):
     config_values = [
         ('server_url', lambda: raw_input('Root url to your jira server [f.e. "http://jira.example.org"]\n')),
         ('username', lambda: raw_input('Your jira user name\n')),
-        ('password', lambda: raw_input('Your jira password\n')),
+        ('password', lambda: getpass('Your jira password\n')),
         ('auto_start', lambda: raw_input('Automatically start the issue when you start the task in hamster? [y/n]\n'))
     ]
 
