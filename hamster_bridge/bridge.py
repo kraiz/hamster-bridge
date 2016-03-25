@@ -41,6 +41,7 @@ class HamsterBridge(hamster.client.Storage):
         """
         path = os.path.expanduser(config_path)
         config = ConfigParser.RawConfigParser()
+        sensitive_config = ConfigParser.RawConfigParser()
         # read from file if exists
         if os.path.exists(path):
             logger.debug('Reading config file from %s', path)
@@ -48,7 +49,7 @@ class HamsterBridge(hamster.client.Storage):
         # let listeners extend
         for listener in self._listeners:
             logger.debug('Configuring listener %s', listener)
-            listener.configure(config)
+            listener.configure(config, sensitive_config)
         # save to file
         with open(path, 'wb') as configfile:
             logger.debug('Writing back configuration to %s', path)

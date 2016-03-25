@@ -22,18 +22,22 @@ class JiraHamsterListener(HamsterListener):
         ConfigValue(
             key='server_url',
             setup_func=lambda: raw_input('Root url to your jira server [f.e. "http://jira.example.org"]\n'),
+            sensitive=False,
         ),
         ConfigValue(
             key='username',
             setup_func=lambda: raw_input('Your jira user name\n'),
+            sensitive=False,
         ),
         ConfigValue(
             key='password',
             setup_func=lambda: getpass('Your jira password\n'),
+            sensitive=True,
         ),
         ConfigValue(
             key='auto_start',
             setup_func=lambda: raw_input('Automatically start the issue when you start the task in hamster? [y/n]\n'),
+            sensitive=False,
         ),
     ]
 
@@ -41,9 +45,9 @@ class JiraHamsterListener(HamsterListener):
 
     # noinspection PyBroadException
     def prepare(self):
-        server_url = self.config.get(self.short_name, 'server_url')
-        username = self.config.get(self.short_name, 'username')
-        password = self.config.get(self.short_name, 'password')
+        server_url = self.get_from_config('server_url')
+        username = self.get_from_config('username')
+        password = self.get_from_config('password')
 
         logger.info('Connecting as "%s" to "%s"', username, server_url)
         self.jira = JIRA(server_url, basic_auth=(username, password))
@@ -74,7 +78,8 @@ class JiraHamsterListener(HamsterListener):
                         logger.exception('Error communicating with Jira')
 
     def on_fact_started(self, fact):
-        if self.config.get(self.short_name, 'auto_start') == 'y':
+        auto_start = self.get_from_config('auto_start')
+        if auto_start == 'y':
             try:
                 issue_name = self.__issue_from_fact(fact)
                 if issue_name is None:

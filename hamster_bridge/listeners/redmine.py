@@ -29,38 +29,33 @@ class RedmineHamsterListener(HamsterListener):
         ConfigValue(
             key='server_url',
             setup_func=lambda: raw_input('Root URL to the Redmine server [f.e. "http://redmine.example.org/"]\n'),
+            sensitive=False,
         ),
         ConfigValue(
             key='api_key',
             setup_func=lambda: raw_input('Your Redmine API access key.\n'),
+            sensitive=False,
         ),
         ConfigValue(
             key='version',
             setup_func=lambda: raw_input('The Redmine version number, e.g. 2.5.1\n'),
+            sensitive=False,
         ),
         ConfigValue(
             key='auto_start',
             setup_func=lambda: raw_input('Automatically start the issue when you start the task in hamster? [y/n]\n'),
+            sensitive=False,
         ),
         # FIXME still usable?
         ConfigValue(
             key='verify_ssl',
             setup_func=lambda: raw_input('Verify HTTPS/SSL connections? [y/n]\n'),
+            sensitive=False,
         ),
     ]
 
     # Redmine issue key is just a number
     issue_from_title = re.compile('([0-9]+)\ ')
-
-    def __get_config(self, key):
-        """
-        Returns the config value with the given key.
-        :param key: the key to get
-        :type key: basestring
-        :return: the config value
-        :rtype: basestring
-        """
-        return self.config.get(self.short_name, key)
 
     def __init__(self):
         """
@@ -175,11 +170,11 @@ class RedmineHamsterListener(HamsterListener):
         
         # setup the redmine instance
         self.redmine = Redmine(
-            self.__get_config('server_url'),
-            key=self.__get_config('api_key'),
-            version=self.__get_config('version'),
+            self.get_from_config('server_url'),
+            key=self.get_from_config('api_key'),
+            version=self.get_from_config('version'),
             requests={
-                'verify': True if self.__get_config('verify_ssl') == 'y' else False
+                'verify': True if self.get_from_config('verify_ssl') == 'y' else False
             }
         )
         # fetch the possible activities for time entries
@@ -209,7 +204,8 @@ class RedmineHamsterListener(HamsterListener):
         :type fact: hamster.lib.stuff.Fact
         """
         # if issue shall be auto started...
-        if self.config.get(self.short_name, 'auto_start') == 'y':
+        auto_start = self.get_from_config('auto_start')
+        if auto_start == 'y':
             # fetch the issue from the hamster fact
             issue = self.__get_issue_from_fact(fact)
 
