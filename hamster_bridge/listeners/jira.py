@@ -2,7 +2,10 @@ from __future__ import absolute_import
 
 from jira import JIRA, JIRAError
 
-from hamster_bridge.listeners import HamsterListener
+from hamster_bridge.listeners import (
+    HamsterListener,
+    ConfigValue,
+)
 
 import logging
 import re
@@ -16,10 +19,22 @@ class JiraHamsterListener(HamsterListener):
     short_name = 'jira'
 
     config_values = [
-        ('server_url', lambda: raw_input('Root url to your jira server [f.e. "http://jira.example.org"]\n')),
-        ('username', lambda: raw_input('Your jira user name\n')),
-        ('password', lambda: getpass('Your jira password\n')),
-        ('auto_start', lambda: raw_input('Automatically start the issue when you start the task in hamster? [y/n]\n'))
+        ConfigValue(
+            key='server_url',
+            setup_func=lambda: raw_input('Root url to your jira server [f.e. "http://jira.example.org"]\n'),
+        ),
+        ConfigValue(
+            key='username',
+            setup_func=lambda: raw_input('Your jira user name\n'),
+        ),
+        ConfigValue(
+            key='password',
+            setup_func=lambda: getpass('Your jira password\n'),
+        ),
+        ConfigValue(
+            key='auto_start',
+            setup_func=lambda: raw_input('Automatically start the issue when you start the task in hamster? [y/n]\n'),
+        ),
     ]
 
     issue_from_title = re.compile('([A-Z][A-Z0-9]+-[0-9]+)')

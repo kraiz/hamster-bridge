@@ -3,7 +3,10 @@ from __future__ import absolute_import
 import logging
 import re
 
-from hamster_bridge.listeners import HamsterListener
+from hamster_bridge.listeners import (
+    HamsterListener,
+    ConfigValue,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -23,12 +26,27 @@ class RedmineHamsterListener(HamsterListener):
     short_name = 'redmine'
 
     config_values = [
-        ('server_url', lambda: raw_input('Root URL to the Redmine server [f.e. "http://redmine.example.org/"]\n')),
-        ('api_key', lambda: raw_input('Your Redmine API access key.\n')),
-        ('version', lambda: raw_input('The Redmine version number, e.g. 2.5.1\n')),
-        ('auto_start', lambda: raw_input('Automatically start the issue when you start the task in hamster? [y/n]\n')),
+        ConfigValue(
+            key='server_url',
+            setup_func=lambda: raw_input('Root URL to the Redmine server [f.e. "http://redmine.example.org/"]\n'),
+        ),
+        ConfigValue(
+            key='api_key',
+            setup_func=lambda: raw_input('Your Redmine API access key.\n'),
+        ),
+        ConfigValue(
+            key='version',
+            setup_func=lambda: raw_input('The Redmine version number, e.g. 2.5.1\n'),
+        ),
+        ConfigValue(
+            key='auto_start',
+            setup_func=lambda: raw_input('Automatically start the issue when you start the task in hamster? [y/n]\n'),
+        ),
         # FIXME still usable?
-        ('verify_ssl', lambda: raw_input('Verify HTTPS/SSL connections? [y/n]\n')),
+        ConfigValue(
+            key='verify_ssl',
+            setup_func=lambda: raw_input('Verify HTTPS/SSL connections? [y/n]\n'),
+        ),
     ]
 
     # Redmine issue key is just a number
