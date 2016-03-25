@@ -34,6 +34,8 @@ def main():
                         help='check every this amount of seconds for updates')
     parser.add_argument('--config-path', default=CONFIG_PATH, type=str, 
                         help='path to config file, defaults to {}'.format(CONFIG_PATH))
+    parser.add_argument('--save-passwords', action='store_true',
+                        help='store passwords and other sensitive data in the config file, defaults to False.')
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -43,7 +45,7 @@ def main():
     logger = logging.getLogger(__name__)
 
     logger.info('Starting hamster bridge')
-    bridge = HamsterBridge()
+    bridge = HamsterBridge(save_passwords=args.save_passwords)
     logger.debug('Activating listener: %s', args.bugtracker)
     bridge.add_listener(listener_choices[args.bugtracker]())
     bridge.configure(args.config_path)
