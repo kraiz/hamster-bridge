@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import os
 
 import logging
 import re
@@ -46,10 +47,10 @@ class RedmineHamsterListener(HamsterListener):
             setup_func=lambda: raw_input('Automatically start the issue when you start the task in hamster? [y/n]\n'),
             sensitive=False,
         ),
-        # FIXME still usable?
         ConfigValue(
             key='verify_ssl',
-            setup_func=lambda: raw_input('Verify HTTPS/SSL connections? [y/n]\n'),
+            setup_func=lambda: raw_input('Verify HTTPS/SSL connections? '
+                'You can also specify the path to a CA certificate bundle. [y/n/PATH]\n'),
             sensitive=False,
         ),
     ]
@@ -168,14 +169,30 @@ class RedmineHamsterListener(HamsterListener):
         from redmine import Redmine
         from redmine.exceptions import BaseRedmineError
         
+        verify_ssl = self.get_from_config('verify_ssl')
+        requests_dict = {}
+        if verify_ssl.lower() in ('y', 'true'):
+            logger.info("Enabling SSL/TLS certificate verification (default CA path)")
+            requests_dict['verify'] = True
+        elif verify_ssl.lower() in ('n', 'false'):
+            logger.warn("Disabling SSL/TLS certificate verification")
+            requests_dict['verify'] = False
+        elif os.path.isfile(verify_ssl):
+            logger.info("Enabling SSL/TLS certificate verification (custom CA "
+                "path) '%s'", verify_ssl)
+            requests_dict['verify'] = verify_ssl
+        else:
+            logger.error("verify_ssl = '%s' is not a valid CA cert path nor a "
+                "valid option. Falling back to enabling SSL/TLS verification "
+                "with default CA path", verify_ssl)
+            requests_dict['verify'] = True
+
         # setup the redmine instance
         self.redmine = Redmine(
             self.get_from_config('server_url'),
             key=self.get_from_config('api_key'),
             version=self.get_from_config('version'),
-            requests={
-                'verify': True if self.get_from_config('verify_ssl') == 'y' else False
-            }
+            requests=requests_dict,
         )
         # fetch the possible activities for time entries
         time_entry_activities = self.redmine.enumeration.filter(resource='time_entry_activities')

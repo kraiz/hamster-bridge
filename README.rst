@@ -69,6 +69,46 @@ config file. If you are upgrading from an older version of **hamster-bridge**
 (where all data was stored in the config file by default) then it will continue
 to work like before because all required values are in the config file.
 
+SSL/TLS certificates
+--------------------
+
+The **verify_ssl** config entry has 3 possible values: 'y' to enable
+certificate verification with the default CA, 'n' to disable certificate
+verification (not recommended!) and the path to a CA (Certificate Authority)
+bundle containing SSL/TLS certificates. When setting a path use the **full
+path** to prevent errors.
+
+This is very valuable if the CA store that your Python environment uses by
+default does not include the CA or intermediate CA that signed the certificate
+of your JIRA/Redmine site. This is also the case if your JIRA/Redmine site uses
+a self-signed certificate.
+
+How to set it up? Get your certificate or certificate chain and store it in a
+file. Specify the path to that file in the config.
+
+For instance your can do this with *Google Chrome* by:
+
+* opening your JIRA/Redmine site
+* clicking on the small lock icon (View site information) in the address bar
+* selecting "Connection", "Certificate information", "Details"
+* clicking on "Export" and choosing "Base64-encoded ASCII, certificate chain"
+* remembering the path you stored the file under and specifying that path in
+  the **hamster-bridge** config
+
+If your JIRA/Redmine site uses a certificate signed by a globally trusted root
+CA you might want to try using a standard CA bundle. For example:
+
+* With Linux Debian based systems (e.g. Ubuntu) you could use the
+  path */etc/ssl/certs/ca-certificates.crt*
+* Download the `certifi bundle <https://certifi.io/en/latest/>`_ and use it
+
+For Redmine the **verify_ssl** option existed already and has been extended to
+also allow you to specify a CA cert bundle path. If you had previously
+specified y/n in the config it will continue to work as before.
+
+If **verify_ssl** is set to an unknown value or to an invalid path then the
+fallback is SSL/TLS certificate verification with the default CA bundle.
+
 
 problems?
 ---------
@@ -114,6 +154,9 @@ changes
 
 * feature: don't store sensitive data such as passwords in the config file
   (can be overridden with **--save-passwords**)
+* feature: add **verify_ssl** config option for JIRA and extend it for Redmine.
+  It is now possible to specify [y/n/path] where path is the path to a CA
+  certificate bundle
 
 0.5.2
 -----

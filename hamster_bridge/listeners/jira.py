@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import os
 
 from jira import JIRA, JIRAError
 
@@ -39,6 +40,12 @@ class JiraHamsterListener(HamsterListener):
             setup_func=lambda: raw_input('Automatically start the issue when you start the task in hamster? [y/n]\n'),
             sensitive=False,
         ),
+        ConfigValue(
+            key='verify_ssl',
+            setup_func=lambda: raw_input('Verify HTTPS/SSL connections? '
+                'You can also specify the path to a CA certificate bundle. [y/n/PATH]\n'),
+            sensitive=False,
+        ),
     ]
 
     issue_from_title = re.compile('([A-Z][A-Z0-9]+-[0-9]+)')
@@ -48,9 +55,31 @@ class JiraHamsterListener(HamsterListener):
         server_url = self.get_from_config('server_url')
         username = self.get_from_config('username')
         password = self.get_from_config('password')
+        verify_ssl = self.get_from_config('verify_ssl')
+
+        options = {}
+        if verify_ssl.lower() in ('y', 'true'):
+            logger.info("Enabling SSL/TLS certificate verification (default CA path)")
+            options['verify'] = True
+        elif verify_ssl.lower() in ('n', 'false'):
+            logger.warn("Disabling SSL/TLS certificate verification")
+            options['verify'] = False
+        elif os.path.isfile(verify_ssl):
+            logger.info("Enabling SSL/TLS certificate verification (custom CA "
+                "path) '%s'", verify_ssl)
+            options['verify'] = verify_ssl
+        else:
+            logger.error("verify_ssl = '%s' is not a valid CA cert path nor a "
+                "valid option. Falling back to enabling SSL/TLS verification "
+                "with default CA path", verify_ssl)
+            options['verify'] = True
 
         logger.info('Connecting as "%s" to "%s"', username, server_url)
-        self.jira = JIRA(server_url, basic_auth=(username, password))
+        self.jira = JIRA(
+            server_url,
+            options=options,
+            basic_auth=(username, password)
+        )
 
         try:
             self.jira.projects()
