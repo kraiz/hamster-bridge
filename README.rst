@@ -40,6 +40,7 @@ It will ask you for your server and login and will save that data for next start
 
 usage
 =====
+
 * Start hamster and the hamster-bridge.
 * Create tasks and place a JIRA/Redmine issue name inside the task title or it's tags.
 * When you're done, stop this task.
@@ -52,8 +53,29 @@ it will read through to issue in the tag.
 Once *one* valid ticket is found, the hamster-bridge will log the spent time to this issue together with the hamster
 task description as comment.
 
-Problems? Don't work for you? Open up an `issue on GitHub <https://github.com/kraiz/hamster-bridge/issues>`_ together with the
+sensitive data (passwords)
+--------------------------
+
+Since version 0.6 by default no sensitive data is stored in the config file
+(e.g.  :code:`~/.hamster-bridge.cfg`). Currently the only data marked as
+*sensitive* is the JIRA password.
+
+Every time you start the application it will use all values found in the config
+file and interactively ask you for the missing values (e.g. JIRA password).
+
+If you want to force saving this *sensitive* data in the config file you can
+use the **--save-passwords** option. You can also manually add the data to the
+config file. If you are upgrading from an older version of **hamster-bridge**
+(where all data was stored in the config file by default) then it will continue
+to work like before because all required values are in the config file.
+
+
+problems?
+---------
+
+Don't work for you? Open up an `issue on GitHub <https://github.com/kraiz/hamster-bridge/issues>`_ together with the
 debug output (start the bridge with "-d").
+
 
 hints on redmine
 ----------------
@@ -86,6 +108,12 @@ MIT-License, see LICENSE file.
 
 changes
 =======
+
+0.6
+---
+
+* feature: don't store sensitive data such as passwords in the config file
+  (can be overridden with **--save-passwords**)
 
 0.5.2
 -----
