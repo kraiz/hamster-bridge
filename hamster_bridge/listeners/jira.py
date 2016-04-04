@@ -37,7 +37,9 @@ class JiraHamsterListener(HamsterListener):
         ),
         ConfigValue(
             key='auto_start',
-            setup_func=lambda: raw_input('Automatically start the issue when you start the task in hamster? [y/n]\n'),
+            setup_func=lambda: raw_input('Automatically start the issue when '
+                'you start the task in hamster? You can specify the name of '
+                'the JIRA transition to use [y/n/TRANSITION_NAME]\n'),
             sensitive=False,
         ),
         ConfigValue(
@@ -108,18 +110,32 @@ class JiraHamsterListener(HamsterListener):
 
     def on_fact_started(self, fact):
         auto_start = self.get_from_config('auto_start')
-        if auto_start == 'y':
-            try:
-                issue_name = self.__issue_from_fact(fact)
-                if issue_name is None:
-                    return
+        if auto_start.lower() in ('n', 'false'):
+            return
+        elif auto_start.lower() in ('y', 'true'):
+            transition_name = u'Start Progress'
+        else:
+            transition_name = unicode(auto_start, 'utf-8')
+        try:
+            issue_name = self.__issue_from_fact(fact)
+            if issue_name is None:
+                return
 
-                for transition in self.jira.transitions(issue_name):
-                    if transition['name'] == u'Start Progress':
-                        self.jira.transition_issue(issue_name, transition['id'])
-                        logger.info('Marked issue "%s" as "In Progress"', issue_name)
-            except JIRAError:
-                logger.exception('Error communicating with Jira')
+            transition_found = False
+            transitions = self.jira.transitions(issue_name)
+            for transition in transitions:
+                if transition['name'] == transition_name:
+                    transition_found = True
+                    self.jira.transition_issue(issue_name, transition['id'])
+                    logger.info('Marked issue "%s" as "%s"', issue_name, transition_name)
+            if not transition_found:
+                logger.warn(
+                    "Could not find transition '%s' in '%s'",
+                    transition_name,
+                    [t['name'] for t in transitions]
+                )
+        except JIRAError:
+            logger.exception('Error communicating with Jira')
 
     def on_fact_stopped(self, fact):
         time_spent = '%dm' % (fact.delta.total_seconds() / 60)

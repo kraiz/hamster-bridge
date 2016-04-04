@@ -110,6 +110,23 @@ If **verify_ssl** is set to an unknown value or to an invalid path then the
 fallback is SSL/TLS certificate verification with the default CA bundle.
 
 
+auto start
+----------
+
+It is possible both for JIRA and Redmine to 'auto start' (i.e. mark as in
+progress or something equivalent) an issue when you start tracking time for it.
+
+Simply set the corresponding config option to 'y' to activate auto start and to
+'n' to disable it.
+
+In the case of JIRA a third value is possible. This value implicitly assumes
+'y' and uses the value you set as the name of the transition. For example if
+you want to use the transition 'Working' you can set the config value to
+precisely that value. The same goes if you want to the set the transition to
+'In Progress'. Per default 'Start Progress' is used (i.e. when you specify
+'y').
+
+
 problems?
 ---------
 
@@ -157,6 +174,9 @@ changes
 * feature: add **verify_ssl** config option for JIRA and extend it for Redmine.
   It is now possible to specify [y/n/path] where path is the path to a CA
   certificate bundle
+* feature: extend **auto_start** config option for JIRA.
+  It is now possible to specify [y/n/TRANSITION_NAME] where TRANSITION_NAME is
+  the name of the transition to use instead of 'Start Progress' (default)
 
 0.5.2
 -----
