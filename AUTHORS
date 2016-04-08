@@ -7,3 +7,8 @@ dArignac - Alexander Herrmann
 
 toggm
 * added support to lookup jira issue name in hamster tags #9
+
+omarkohl - Omar Kohl
+* sensitive data in config #21
+* SSL certificate path #21
+* custom JIRA transition name #21

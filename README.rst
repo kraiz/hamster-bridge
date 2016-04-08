@@ -168,7 +168,6 @@ changes
 
 0.6
 ---
-
 * feature: don't store sensitive data such as passwords in the config file
   (can be overridden with **--save-passwords**)
 * feature: add **verify_ssl** config option for JIRA and extend it for Redmine.
@@ -177,6 +176,7 @@ changes
 * feature: extend **auto_start** config option for JIRA.
   It is now possible to specify [y/n/TRANSITION_NAME] where TRANSITION_NAME is
   the name of the transition to use instead of 'Start Progress' (default)
+* special thx to @omarkohl for PR #21
 
 0.5.2
 -----
@@ -192,12 +192,12 @@ changes
 * feature: improved logging a lot, added --debug switch (#12)
 * feature: added flag to set the hamster check interval
 * bugfix/feature: switched library from "jira-python" to "jira" to support current jira versions (#10)
-* bugfix: bigger redmine reafactoring (#15, thx to dArignac)
+* bugfix: bigger redmine reafactoring (#15, thx to @dArignac)
 * bugfix: force sensitive file permissions for config file
 
 0.4.0
 -----
-* feature: added support to lookup jira issue name in hamster tags (#9 thx toggm)
+* feature: added support to lookup jira issue name in hamster tags (#9, thx to @toggm)
 
 0.3.1
 -----
