@@ -40,6 +40,7 @@ It will ask you for your server and login and will save that data for next start
 
 usage
 =====
+
 * Start hamster and the hamster-bridge.
 * Create tasks and place a JIRA/Redmine issue name inside the task title or it's tags.
 * When you're done, stop this task.
@@ -52,8 +53,86 @@ it will read through to issue in the tag.
 Once *one* valid ticket is found, the hamster-bridge will log the spent time to this issue together with the hamster
 task description as comment.
 
-Problems? Don't work for you? Open up an `issue on GitHub <https://github.com/kraiz/hamster-bridge/issues>`_ together with the
+sensitive data (passwords)
+--------------------------
+
+Since version 0.6 by default no sensitive data is stored in the config file
+(e.g.  :code:`~/.hamster-bridge.cfg`). Currently the only data marked as
+*sensitive* is the JIRA password.
+
+Every time you start the application it will use all values found in the config
+file and interactively ask you for the missing values (e.g. JIRA password).
+
+If you want to force saving this *sensitive* data in the config file you can
+use the **--save-passwords** option. You can also manually add the data to the
+config file. If you are upgrading from an older version of **hamster-bridge**
+(where all data was stored in the config file by default) then it will continue
+to work like before because all required values are in the config file.
+
+SSL/TLS certificates
+--------------------
+
+The **verify_ssl** config entry has 3 possible values: 'y' to enable
+certificate verification with the default CA, 'n' to disable certificate
+verification (not recommended!) and the path to a CA (Certificate Authority)
+bundle containing SSL/TLS certificates. When setting a path use the **full
+path** to prevent errors.
+
+This is very valuable if the CA store that your Python environment uses by
+default does not include the CA or intermediate CA that signed the certificate
+of your JIRA/Redmine site. This is also the case if your JIRA/Redmine site uses
+a self-signed certificate.
+
+How to set it up? Get your certificate or certificate chain and store it in a
+file. Specify the path to that file in the config.
+
+For instance your can do this with *Google Chrome* by:
+
+* opening your JIRA/Redmine site
+* clicking on the small lock icon (View site information) in the address bar
+* selecting "Connection", "Certificate information", "Details"
+* clicking on "Export" and choosing "Base64-encoded ASCII, certificate chain"
+* remembering the path you stored the file under and specifying that path in
+  the **hamster-bridge** config
+
+If your JIRA/Redmine site uses a certificate signed by a globally trusted root
+CA you might want to try using a standard CA bundle. For example:
+
+* With Linux Debian based systems (e.g. Ubuntu) you could use the
+  path */etc/ssl/certs/ca-certificates.crt*
+* Download the `certifi bundle <https://certifi.io/en/latest/>`_ and use it
+
+For Redmine the **verify_ssl** option existed already and has been extended to
+also allow you to specify a CA cert bundle path. If you had previously
+specified y/n in the config it will continue to work as before.
+
+If **verify_ssl** is set to an unknown value or to an invalid path then the
+fallback is SSL/TLS certificate verification with the default CA bundle.
+
+
+auto start
+----------
+
+It is possible both for JIRA and Redmine to 'auto start' (i.e. mark as in
+progress or something equivalent) an issue when you start tracking time for it.
+
+Simply set the corresponding config option to 'y' to activate auto start and to
+'n' to disable it.
+
+In the case of JIRA a third value is possible. This value implicitly assumes
+'y' and uses the value you set as the name of the transition. For example if
+you want to use the transition 'Working' you can set the config value to
+precisely that value. The same goes if you want to the set the transition to
+'In Progress'. Per default 'Start Progress' is used (i.e. when you specify
+'y').
+
+
+problems?
+---------
+
+Don't work for you? Open up an `issue on GitHub <https://github.com/kraiz/hamster-bridge/issues>`_ together with the
 debug output (start the bridge with "-d").
+
 
 hints on redmine
 ----------------
@@ -86,6 +165,18 @@ MIT-License, see LICENSE file.
 
 changes
 =======
+
+0.6
+---
+
+* feature: don't store sensitive data such as passwords in the config file
+  (can be overridden with **--save-passwords**)
+* feature: add **verify_ssl** config option for JIRA and extend it for Redmine.
+  It is now possible to specify [y/n/path] where path is the path to a CA
+  certificate bundle
+* feature: extend **auto_start** config option for JIRA.
+  It is now possible to specify [y/n/TRANSITION_NAME] where TRANSITION_NAME is
+  the name of the transition to use instead of 'Start Progress' (default)
 
 0.5.2
 -----

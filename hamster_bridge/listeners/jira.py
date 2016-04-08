@@ -1,11 +1,16 @@
 from __future__ import absolute_import
+import os
 
 from jira import JIRA, JIRAError
 
-from hamster_bridge.listeners import HamsterListener
+from hamster_bridge.listeners import (
+    HamsterListener,
+    ConfigValue,
+)
 
 import logging
 import re
+from getpass import getpass
 
 logger = logging.getLogger(__name__)
 
@@ -15,22 +20,68 @@ class JiraHamsterListener(HamsterListener):
     short_name = 'jira'
 
     config_values = [
-        ('server_url', lambda: raw_input('Root url to your jira server [f.e. "http://jira.example.org"]\n')),
-        ('username', lambda: raw_input('Your jira user name\n')),
-        ('password', lambda: raw_input('Your jira password\n')),
-        ('auto_start', lambda: raw_input('Automatically start the issue when you start the task in hamster? [y/n]\n'))
+        ConfigValue(
+            key='server_url',
+            setup_func=lambda: raw_input('Root url to your jira server [f.e. "http://jira.example.org"]\n'),
+            sensitive=False,
+        ),
+        ConfigValue(
+            key='username',
+            setup_func=lambda: raw_input('Your jira user name\n'),
+            sensitive=False,
+        ),
+        ConfigValue(
+            key='password',
+            setup_func=lambda: getpass('Your jira password\n'),
+            sensitive=True,
+        ),
+        ConfigValue(
+            key='auto_start',
+            setup_func=lambda: raw_input('Automatically start the issue when '
+                'you start the task in hamster? You can specify the name of '
+                'the JIRA transition to use [y/n/TRANSITION_NAME]\n'),
+            sensitive=False,
+        ),
+        ConfigValue(
+            key='verify_ssl',
+            setup_func=lambda: raw_input('Verify HTTPS/SSL connections? '
+                'You can also specify the path to a CA certificate bundle. [y/n/PATH]\n'),
+            sensitive=False,
+        ),
     ]
 
     issue_from_title = re.compile('([A-Z][A-Z0-9]+-[0-9]+)')
 
     # noinspection PyBroadException
     def prepare(self):
-        server_url = self.config.get(self.short_name, 'server_url')
-        username = self.config.get(self.short_name, 'username')
-        password = self.config.get(self.short_name, 'password')
+        server_url = self.get_from_config('server_url')
+        username = self.get_from_config('username')
+        password = self.get_from_config('password')
+        verify_ssl = self.get_from_config('verify_ssl')
+
+        options = {}
+        if verify_ssl.lower() in ('y', 'true'):
+            logger.info("Enabling SSL/TLS certificate verification (default CA path)")
+            options['verify'] = True
+        elif verify_ssl.lower() in ('n', 'false'):
+            logger.warn("Disabling SSL/TLS certificate verification")
+            options['verify'] = False
+        elif os.path.isfile(verify_ssl):
+            logger.info("Enabling SSL/TLS certificate verification (custom CA "
+                "path) '%s'", verify_ssl)
+            options['verify'] = verify_ssl
+        else:
+            logger.error("verify_ssl = '%s' is not a valid CA cert path nor a "
+                "valid option. Falling back to enabling SSL/TLS verification "
+                "with default CA path", verify_ssl)
+            options['verify'] = True
 
         logger.info('Connecting as "%s" to "%s"', username, server_url)
-        self.jira = JIRA(server_url, basic_auth=(username, password))
+        self.jira = JIRA(
+            server_url,
+            options=options,
+            basic_auth=(username, password)
+        )
 
         try:
             self.jira.projects()
@@ -58,18 +109,33 @@ class JiraHamsterListener(HamsterListener):
                         logger.exception('Error communicating with Jira')
 
     def on_fact_started(self, fact):
-        if self.config.get(self.short_name, 'auto_start') == 'y':
-            try:
-                issue_name = self.__issue_from_fact(fact)
-                if issue_name is None:
-                    return
+        auto_start = self.get_from_config('auto_start')
+        if auto_start.lower() in ('n', 'false'):
+            return
+        elif auto_start.lower() in ('y', 'true'):
+            transition_name = u'Start Progress'
+        else:
+            transition_name = unicode(auto_start, 'utf-8')
+        try:
+            issue_name = self.__issue_from_fact(fact)
+            if issue_name is None:
+                return
 
-                for transition in self.jira.transitions(issue_name):
-                    if transition['name'] == u'Start Progress':
-                        self.jira.transition_issue(issue_name, transition['id'])
-                        logger.info('Marked issue "%s" as "In Progress"', issue_name)
-            except JIRAError:
-                logger.exception('Error communicating with Jira')
+            transition_found = False
+            transitions = self.jira.transitions(issue_name)
+            for transition in transitions:
+                if transition['name'] == transition_name:
+                    transition_found = True
+                    self.jira.transition_issue(issue_name, transition['id'])
+                    logger.info('Marked issue "%s" as "%s"', issue_name, transition_name)
+            if not transition_found:
+                logger.warn(
+                    "Could not find transition '%s' in '%s'",
+                    transition_name,
+                    [t['name'] for t in transitions]
+                )
+        except JIRAError:
+            logger.exception('Error communicating with Jira')
 
     def on_fact_stopped(self, fact):
         time_spent = '%dm' % (fact.delta.total_seconds() / 60)

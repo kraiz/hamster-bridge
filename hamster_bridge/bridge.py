@@ -14,14 +14,37 @@ except ImportError:
     raise ImportError('Can not find hamster')
 
 
+def _combine_configs(*configs):
+    """
+    Combines all configs (instances of RawConfigParser) into a single one
+    containing all sections and values. If duplicates appear the later configs
+    will overwrite the earlier values.
+    Returns a RawConfigParser() instance.
+    """
+    result = ConfigParser.RawConfigParser()
+    for config in configs:
+        for section in config.sections():
+            try:
+                result.add_section(section)
+            except ConfigParser.DuplicateSectionError:
+                # Ignore it. We simply want to include all sections from
+                # the source configs
+                pass
+            for option in config.options(section):
+                value = config.get(section, option)
+                result.set(section, option, value)
+    return result
+
+
 class HamsterBridge(hamster.client.Storage):
     """
     Connects to the running hamster instance via dbus. But as the notification does not work reliable there is a
     polling-based loop in the run()-method that will trigger all registered listeners.
     """
-    def __init__(self):
+    def __init__(self, save_passwords=False):
         super(HamsterBridge, self).__init__()
         self._listeners = []
+        self.save_passwords = save_passwords
 
     def add_listener(self, listener):
         """
@@ -41,6 +64,7 @@ class HamsterBridge(hamster.client.Storage):
         """
         path = os.path.expanduser(config_path)
         config = ConfigParser.RawConfigParser()
+        sensitive_config = ConfigParser.RawConfigParser()
         # read from file if exists
         if os.path.exists(path):
             logger.debug('Reading config file from %s', path)
@@ -48,11 +72,15 @@ class HamsterBridge(hamster.client.Storage):
         # let listeners extend
         for listener in self._listeners:
             logger.debug('Configuring listener %s', listener)
-            listener.configure(config)
+            listener.configure(config, sensitive_config)
         # save to file
         with open(path, 'wb') as configfile:
             logger.debug('Writing back configuration to %s', path)
-            config.write(configfile)
+            if self.save_passwords:
+                all_configs = _combine_configs(config, sensitive_config)
+                all_configs.write(configfile)
+            else:
+                config.write(configfile)
         # as we store passwords in clear text, let's at least set correct file permissions
         logger.debug('Setting owner only file permissions to %s', path)
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
