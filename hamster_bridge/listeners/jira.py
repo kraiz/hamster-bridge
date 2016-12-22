@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 import os
+# MAX patch
+import sys
 
 from jira import JIRA, JIRAError
 
@@ -22,30 +24,30 @@ class JiraHamsterListener(HamsterListener):
     config_values = [
         ConfigValue(
             key='server_url',
-            setup_func=lambda: raw_input('Root url to your jira server [f.e. "http://jira.example.org"]\n'),
+            setup_func=lambda: raw_input('Root url of your jira server [f.e. "http://jira.example.org"]: '),
             sensitive=False,
         ),
         ConfigValue(
             key='username',
-            setup_func=lambda: raw_input('Your jira user name\n'),
+            setup_func=lambda: raw_input('Your jira user name: '),
             sensitive=False,
         ),
         ConfigValue(
             key='password',
-            setup_func=lambda: getpass('Your jira password\n') if sys.stdin.isatty() else raw_input(),
+            setup_func=lambda: getpass('Your jira password: ') if sys.stdin.isatty() else raw_input(),
             sensitive=True,
         ),
         ConfigValue(
             key='auto_start',
             setup_func=lambda: raw_input('Automatically start the issue when '
-                'you start the task in hamster? You can specify the name of '
-                'the JIRA transition to use [y/n/TRANSITION_NAME]\n'),
+                'you start the task in hamster?  You can also specify the name of '
+                'the JIRA transition to use.  [y/n/TRANSITION_NAME]: '),
             sensitive=False,
         ),
         ConfigValue(
             key='verify_ssl',
-            setup_func=lambda: raw_input('Verify HTTPS/SSL connections? '
-                'You can also specify the path to a CA certificate bundle. [y/n/PATH]\n'),
+            setup_func=lambda: raw_input('Verify HTTPS/SSL connections?  '
+                'You can also specify the path to a CA certificate bundle.  [y/n/PATH]: '),
             sensitive=False,
         ),
     ]
