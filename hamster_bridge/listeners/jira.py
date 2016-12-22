@@ -32,7 +32,7 @@ class JiraHamsterListener(HamsterListener):
         ),
         ConfigValue(
             key='password',
-            setup_func=lambda: getpass('Your jira password\n'),
+            setup_func=lambda: getpass('Your jira password\n') if sys.stdin.isatty() else raw_input(),
             sensitive=True,
         ),
         ConfigValue(
