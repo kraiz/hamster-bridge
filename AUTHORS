@@ -12,3 +12,6 @@ omarkohl - Omar Kohl
 * sensitive data in config #21
 * SSL certificate path #21
 * custom JIRA transition name #21
+
+next-mad-hatter
+* Enable reading password from stdin, make prompt evident #25
