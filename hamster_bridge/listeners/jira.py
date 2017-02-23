@@ -12,6 +12,8 @@ from hamster_bridge.listeners import (
 
 import logging
 import re
+import datetime
+from dateutil.tz import *
 from getpass import getpass
 
 logger = logging.getLogger(__name__)
@@ -142,10 +144,15 @@ class JiraHamsterListener(HamsterListener):
     def on_fact_stopped(self, fact):
         time_spent = '%dm' % (fact.delta.total_seconds() / 60)
         issue_name = self.__issue_from_fact(fact)
+        tstart = fact.start_time
         if issue_name:
             try:
-                worklog = self.jira.add_worklog(issue_name, time_spent, comment=fact.description)
-                logger.info('Logged work: %s to %s (created %r)', time_spent, issue_name, worklog)
+                logger.info('Log work: %s - %s to %s', tstart, time_spent, issue_name)
+                if tstart.tzinfo is None:
+                    logger.info("Start time without timezone. Use local timzone info!")
+                    tstart = tstart.replace(tzinfo=tzlocal())
+                worklog = self.jira.add_worklog(issue_name, time_spent, started=tstart, comment=fact.description)
+                logger.info('Logged work: %s - %s to %s (created %r)', fact.start_time, time_spent, issue_name, worklog)
             except JIRAError:
                 logger.exception('Error communicating with Jira')
         else:
