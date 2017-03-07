@@ -15,3 +15,6 @@ omarkohl - Omar Kohl
 
 next-mad-hatter
 * Enable reading password from stdin, make prompt evident #25
+
+lechndo
+* Use fact starting time for jira work log #27
