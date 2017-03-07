@@ -97,9 +97,10 @@ class HamsterBridge(hamster.client.Storage):
                 logger.debug('Preparing listener %s', listener)
                 listener.prepare()
             logger.info('Start listening for hamster activity...')
+            now = datetime.datetime.now().replace(microsecond=0)
             while True:
+                last = now
                 now = datetime.datetime.now().replace(microsecond=0)
-                last = now - datetime.timedelta(seconds=polling_intervall)
                 for fact in self.get_todays_facts():
                     if fact.start_time is not None and last <= fact.start_time < now:
                         logger.debug('Found a started task: %r', vars(fact))
