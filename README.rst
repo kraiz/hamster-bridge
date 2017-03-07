@@ -166,6 +166,10 @@ MIT-License, see LICENSE file.
 changes
 =======
 
+0.7
+---
+* feature: Use fact starting time for jira work log (#27)
+
 0.6
 ---
 * feature: don't store sensitive data such as passwords in the config file
